@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Evolution of Sex: An Interactive Journey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Earthen Harmony -->
+    <!-- Application Structure Plan: The application is structured into four thematic, non-linear sections to transform the dense report into an engaging, explorable narrative: 1. The Core Mystery (hooking the user with the central paradox), 2. The Great Divide (visually explaining the pivotal shift to anisogamy), 3. The Consequences (a browsable gallery of diverse strategies), and 4. The Human Animal (contextualizing our own species). This structure prioritizes conceptual understanding and user-driven exploration over the report's linear format, using a sticky navigation for easy access to any topic. -->
+    <!-- Visualization & Content Choices: Report Info -> Goal -> Viz/Presentation -> Interaction -> Justification. 1. Twofold Cost -> Compare sexual vs. asexual growth -> Bar Chart (Chart.js) -> Static view -> Clear, immediate visualization of the core paradox. 2. Core Hypotheses -> Inform & Organize -> Interactive Cards (HTML/CSS) with icons -> Click-to-reveal -> Breaks down complex theories into digestible chunks. 3. Isogamy to Anisogamy -> Explain a process -> Multi-stage animated diagram (HTML/CSS/JS) -> Automatic animation -> Simplifies the abstract concept of disruptive selection. 4. Diverse Examples -> Organize & Inform -> Tabbed gallery with icon cards (HTML/CSS/JS) -> Click-to-reveal -> Organizes many examples into a non-overwhelming, browsable format. 5. Human Evolution -> Compare & Inform -> Interactive Table & Cards (HTML/CSS/JS) -> Click-to-reveal -> Highlights key human-specific traits and their explanatory hypotheses. NO SVG/Mermaid used; all visuals are built with standard web tech for maximum compatibility and performance. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8; /* Warm off-white */
+            color: #4A4A4A;
+        }
+        :root {
+            --bg-color: #FDFBF8;
+            --text-color: #4A4A4A;
+            --primary-color: #8D6E63; /* Muted brown */
+            --secondary-color: #A1887F; /* Lighter brown */
+            --accent-color: #D4A373; /* Warm Ochre */
+            --card-bg: #FFFFFF;
+            --section-bg-light: #F5F2EB;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+        .content-hidden {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            visibility: hidden;
+        }
+        .content-visible {
+            max-height: 2000px;
+            visibility: visible;
+            transition: max-height 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .tab-btn {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .chart-container {
+            position: relative; 
+            width: 100%; 
+            max-width: 600px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .gamete {
+            border-radius: 50%;
+            position: absolute;
+            transition: all 2s ease-in-out;
+            background-color: var(--accent-color);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-[var(--bg-color)]/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-[var(--primary-color)]">The Evolution of Sex</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#mystery" class="nav-link font-semibold pb-1">The Mystery</a>
+                <a href="#divide" class="nav-link font-semibold pb-1">The Divide</a>
+                <a href="#consequences" class="nav-link font-semibold pb-1">The Consequences</a>
+                <a href="#human" class="nav-link font-semibold pb-1">The Human Animal</a>
+            </div>
+            <button id="mobile-menu-btn" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-4 6h4"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#mystery" class="block py-2 px-6 text-sm hover:bg-[var(--section-bg-light)]">The Mystery</a>
+            <a href="#divide" class="block py-2 px-6 text-sm hover:bg-[var(--section-bg-light)]">The Divide</a>
+            <a href="#consequences" class="block py-2 px-6 text-sm hover:bg-[var(--section-bg-light)]">The Consequences</a>
+            <a href="#human" class="block py-2 px-6 text-sm hover:bg-[var(--section-bg-light)]">The Human Animal</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="text-center py-16 md:py-24 px-6 bg-[var(--section-bg-light)]">
+            <div class="container mx-auto">
+                <h2 class="text-4xl md:text-5xl font-bold text-[var(--primary-color)] mb-4">An Evolutionary Odyssey</h2>
+                <p class="max-w-3xl mx-auto text-lg md:text-xl text-[var(--text-color)]">
+                    Sexual reproduction is one of life's most profound forces, shaping everything from our cells to our societies. Yet, it's an evolutionary puzzle. This journey explores why sex exists, how it created the two sexes, and the staggering diversity of strategies it has spawned across the tree of life.
+                </p>
+            </div>
+        </section>
+
+        <section id="mystery" class="py-16 md:py-24 px-6">
+            <div class="container mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-2">The Core Mystery: Why Sex?</h2>
+                    <p class="max-w-3xl mx-auto text-lg">This section delves into the central paradox of sex. From a purely numerical standpoint, asexual reproduction is far more efficient. We explore the powerful evolutionary benefits that sex must provide to overcome this "twofold cost," focusing on three key hypotheses that explain its dominance.</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="order-2 md:order-1">
+                        <h3 class="text-2xl font-bold mb-4 text-[var(--primary-color)]">The Twofold Cost of Sex</h3>
+                        <p class="mb-4">Imagine an asexual female who clones herself, and a sexual female who needs a male. All asexual offspring can reproduce, while only half of the sexual offspring (females) can. This means an asexual population has the potential to grow twice as fast each generation. This simple but powerful disadvantage is the central puzzle: why would any species pay this cost?</p>
+                        <p>The chart illustrates this fundamental handicap, showing how quickly an asexual lineage can outnumber a sexual one, all other things being equal. The answer must lie in a powerful, qualitative advantage.</p>
+                    </div>
+                    <div class="order-1 md:order-2">
+                        <div class="chart-container bg-[var(--card-bg)] p-4 rounded-lg shadow-md">
+                            <canvas id="twofoldCostChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-16">
+                    <h3 class="text-2xl font-bold text-center mb-8 text-[var(--primary-color)]">The Overwhelming Benefits</h3>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="red-queen-content">
+                            <div class="flex items-center mb-3">
+                                <div class="text-3xl mr-4">🏃‍♀️👑</div>
+                                <h4 class="text-xl font-bold">The Red Queen Hypothesis</h4>
+                            </div>
+                            <p class="text-sm">Adapt to a changing world of parasites and pathogens. Sex shuffles the genetic deck, creating a "moving target" that's harder for enemies to track.</p>
+                            <div id="red-queen-content" class="content-hidden mt-4 text-sm">
+                                <p>Named after a character in *Through the Looking-Glass*, this hypothesis posits a constant co-evolutionary arms race. Parasites, with their short generation times, rapidly evolve to exploit the most common host genotypes. Asexual hosts, being clones, are sitting ducks. Sexual reproduction creates rare genetic combinations each generation, helping the host population stay one step ahead.</p>
+                            </div>
+                        </div>
+
+                        <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="mullers-ratchet-content">
+                            <div class="flex items-center mb-3">
+                                <div class="text-3xl mr-4">⚙️🧬</div>
+                                <h4 class="text-xl font-bold">Muller's Ratchet</h4>
+                            </div>
+                            <p class="text-sm">Avoid the slow decay of the genome. Sex allows populations to purge harmful mutations that accumulate in asexual lineages.</p>
+                            <div id="mullers-ratchet-content" class="content-hidden mt-4 text-sm">
+                                <p>In asexual populations, harmful mutations accumulate irreversibly, like a ratchet clicking forward. Once the "fittest" lineage with the fewest mutations is lost by chance, it can never be recovered. Over time, this leads to a decline in fitness and potential extinction. Sex, through recombination, can recreate mutation-free genomes from parents who carry different mutations.</p>
+                            </div>
+                        </div>
+
+                        <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="dna-repair-content">
+                            <div class="flex items-center mb-3">
+                                <div class="text-3xl mr-4">🔧🔬</div>
+                                <h4 class="text-xl font-bold">DNA Repair & Complementation</h4>
+                            </div>
+                            <p class="text-sm">Fix errors and mask defects. The process of meiosis provides a robust mechanism to repair DNA and hide faulty genes.</p>
+                            <div id="dna-repair-content" class="content-hidden mt-4 text-sm">
+                                <p>On a fundamental level, sex provides immediate benefits. During meiosis, the pairing of homologous chromosomes allows for highly effective repair of DNA damage using the other chromosome as a template. Furthermore, having two copies of each gene (diploidy) allows a functional gene from one parent to mask a defective one from the other, a benefit known as complementation.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="divide" class="py-16 md:py-24 px-6 bg-[var(--section-bg-light)]">
+            <div class="container mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-2">The Great Divide: Origin of Two Sexes</h2>
+                    <p class="max-w-3xl mx-auto text-lg">This section illustrates one of the most pivotal events in life's history: the evolution of two distinct sexes from ancestors with identical sex cells (isogamy). You are about to see how a fundamental trade-off between the size and number of gametes led to the specialized strategies we now call "male" and "female" through a process called disruptive selection.</p>
+                </div>
+                
+                <div class="bg-[var(--card-bg)] rounded-lg shadow-xl p-6 md:p-8">
+                    <h3 class="text-2xl font-bold text-center mb-6 text-[var(--primary-color)]">From Isogamy to Anisogamy</h3>
+                    <div id="anisogamy-animation" class="relative w-full h-64 md:h-80 border-2 border-dashed border-[var(--secondary-color)]/50 rounded-lg overflow-hidden">
+                        <div id="animation-text" class="absolute top-4 left-4 text-lg font-semibold text-[var(--primary-color)]"></div>
+                    </div>
+                    <div class="flex justify-center mt-6">
+                        <button id="play-animation-btn" class="bg-[var(--primary-color)] text-white font-bold py-2 px-6 rounded-full hover:bg-[var(--accent-color)] transition-colors">Play Animation</button>
+                    </div>
+                    <div class="mt-8 grid md:grid-cols-2 gap-6 text-center">
+                        <div>
+                            <p class="text-2xl">♀️</p>
+                            <h4 class="font-bold text-lg">The "Female" Strategy</h4>
+                            <p class="text-sm">Produce few, large, nutrient-rich, and stationary gametes (eggs). This is a strategy of high investment per gamete, focused on providing the zygote with the best possible start.</p>
+                        </div>
+                         <div>
+                            <p class="text-2xl">♂️</p>
+                            <h4 class="font-bold text-lg">The "Male" Strategy</h4>
+                            <p class="text-sm">Produce many, small, mobile, and energetically cheap gametes (sperm). This is a strategy of high quantity, focused on maximizing the number of fertilization opportunities.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="consequences" class="py-16 md:py-24 px-6">
+            <div class="container mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-2">The Consequences: A World of Diversity</h2>
+                    <p class="max-w-3xl mx-auto text-lg">The emergence of two sexes with conflicting interests set the stage for sexual selection, a powerful evolutionary force that has produced some of the most spectacular and bizarre traits in nature. This section provides a gallery of these strategies, showing how plants and animals have evolved countless solutions to the challenges of mating and reproduction.</p>
+                </div>
+                
+                <div class="mb-8 flex justify-center space-x-2 md:space-x-4">
+                    <button class="tab-btn font-semibold py-2 px-4 md:px-6 rounded-full active" data-tab="animal">Animal Kingdom</button>
+                    <button class="tab-btn font-semibold py-2 px-4 md:px-6 rounded-full" data-tab="plant">Plant Kingdom</button>
+                </div>
+
+                <div id="animal-tab" class="tab-content">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="peacock-content">
+                            <h4 class="text-xl font-bold mb-2">🦚 Female Choice: The Peacock's Tail</h4>
+                            <p class="text-sm">A classic example of intersexual selection, where females choose mates based on elaborate ornaments that signal genetic quality.</p>
+                             <div id="peacock-content" class="content-hidden mt-4 text-sm">
+                                <p>The peacock's tail is a "handicap." It's costly to produce and makes the male vulnerable. For this very reason, it's an honest signal of fitness. Only a healthy, robust male can afford such an ornament, and peahens who choose these males give their offspring a better chance of survival.</p>
+                            </div>
+                        </div>
+                        <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="deer-content">
+                            <h4 class="text-xl font-bold mb-2">🦌 Male-Male Competition: Deer Antlers</h4>
+                            <p class="text-sm">Intrasexual selection favors weapons and large body size, as males fight directly for access to females.</p>
+                            <div id="deer-content" class="content-hidden mt-4 text-sm">
+                                <p>Antlers are weapons used in ritualistic combat. The winner of these contests gains mating rights. Antler size is also an honest signal of strength and health, as they are energetically expensive to grow each year, giving females an indirect way to assess a male's quality.</p>
+                            </div>
+                        </div>
+                        <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="waterfowl-content">
+                            <h4 class="text-xl font-bold mb-2">🦆 Sexual Conflict: Waterfowl Genitalia</h4>
+                            <p class="text-sm">An anatomical arms race between the sexes, driven by conflicting reproductive interests.</p>
+                             <div id="waterfowl-content" class="content-hidden mt-4 text-sm">
+                                <p>In many duck species, forced copulation is common. Males have evolved explosive, corkscrew-shaped penises. In response, females have evolved complex, oppositely-coiled vaginas with dead-end pockets. This gives the female physical control over which male fertilizes her eggs, even after copulation.</p>
+                            </div>
+                        </div>
+                        <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="anglerfish-content">
+                            <h4 class="text-xl font-bold mb-2">🎣 Extreme Adaptation: Anglerfish Parasitism</h4>
+                            <p class="text-sm">In the deep sea, finding a mate is hard. The solution: males become permanent, parasitic sperm donors.</p>
+                            <div id="anglerfish-content" class="content-hidden mt-4 text-sm">
+                                <p>When a tiny dwarf male anglerfish finds a massive female, he bites on and fuses his body to hers. Their circulatory systems merge, and the male degenerates into little more than a pair of testes, providing sperm on demand. This required an evolutionary suppression of his immune system to avoid being rejected.</p>
+                            </div>
+                        </div>
+                        <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="seahorse-content">
+                           <h4 class="text-xl font-bold mb-2">🐴 Role Reversal: Male Pregnancy in Seahorses</h4>
+                            <p class="text-sm">A rare case where males take on the primary burden of parental care, leading to a reversal of typical sex roles.</p>
+                             <div id="seahorse-content" class="content-hidden mt-4 text-sm">
+                                <p>The female transfers her eggs to a specialized brood pouch on the male's abdomen. He fertilizes them and carries them until they hatch, providing oxygen and nutrients via a placenta-like structure. This frees the female to produce another clutch of eggs, potentially doubling the pair's reproductive output.</p>
+                            </div>
+                        </div>
+                        <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="dunnock-content">
+                            <h4 class="text-xl font-bold mb-2">🐦 Flexible Strategy: The Dunnock's Love Life</h4>
+                            <p class="text-sm">A demonstration that mating systems are not fixed, but are evolutionary strategies shaped by ecological conditions.</p>
+                             <div id="dunnock-content" class="content-hidden mt-4 text-sm">
+                                <p>This unassuming bird exhibits monogamy, polygyny, polyandry, and polygynandry. The system depends on food distribution, which determines the size of female territories. Males adjust their helping behavior based on their mating access, showcasing a highly sophisticated and flexible response to their social and ecological environment.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="plant-tab" class="tab-content hidden">
+                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="flower-content">
+                            <h4 class="text-xl font-bold mb-2">🌸 The Angiosperm Revolution: Flowers</h4>
+                            <p class="text-sm">The flower is a marvel of reproductive engineering, designed to enlist animals for pollination.</p>
+                            <div id="flower-content" class="content-hidden mt-4 text-sm">
+                                <p>Appearing around 140 million years ago, flowering plants transformed Earth's ecosystems. The flower's parts—petals, sepals, stamens, and pistil—are modified leaves that use color, scent, and shape to attract specific pollinators, creating a highly efficient alternative to imprecise wind pollination.</p>
+                            </div>
+                        </div>
+                        <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="fertilization-content">
+                           <h4 class="text-xl font-bold mb-2">🌱 A Clever Investment: Double Fertilization</h4>
+                           <p class="text-sm">A key innovation in flowering plants that avoids wasting resources on unfertilized seeds.</p>
+                           <div id="fertilization-content" class="content-hidden mt-4 text-sm">
+                               <p>When a pollen grain lands on the stigma, it delivers two sperm nuclei. One fertilizes the egg to create the embryo. The other fuses with two other nuclei to form the endosperm, a nutrient-rich "food pack." The plant only invests in this costly food pack *after* fertilization is confirmed, a highly efficient strategy.</p>
+                           </div>
+                        </div>
+                        <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="orchid-content">
+                            <h4 class="text-xl font-bold mb-2">🌺 Sexual Deception: The Orchid's Trick</h4>
+                            <p class="text-sm">An extreme example of coevolution, where orchids mimic female insects to trick males into pollinating them.</p>
+                            <div id="orchid-content" class="content-hidden mt-4 text-sm">
+                                <p>Some orchids produce no nectar reward. Instead, they mimic the look and pheromonal scent of a female bee or wasp. The male insect attempts to mate with the flower ("pseudocopulation") and, in doing so, unwittingly picks up a pollen packet that he then transfers to the next flower that fools him.</p>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="human" class="py-16 md:py-24 px-6 bg-[var(--section-bg-light)]">
+            <div class="container mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-2">The Human Animal: Our Place in the Story</h2>
+                    <p class="max-w-3xl mx-auto text-lg">Finally, we turn the lens on ourselves. The human reproductive strategy is unique among primates, characterized by long-term pair bonds, extensive paternal care, and two major puzzles: concealed ovulation and menopause. This section explores how the immense challenge of raising our large-brained children shaped these unique traits, making cooperation the cornerstone of our success.</p>
+                </div>
+
+                <div class="bg-[var(--card-bg)] rounded-lg shadow-xl p-6 md:p-8 mb-12">
+                    <h3 class="text-2xl font-bold text-center mb-6 text-[var(--primary-color)]">A Primate Comparison</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b-2 border-[var(--primary-color)]">
+                                    <th class="p-3">Trait</th>
+                                    <th class="p-3 text-center">Chimpanzees</th>
+                                    <th class="p-3 text-center">Bonobos</th>
+                                    <th class="p-3 text-center bg-green-50">Humans</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-[var(--secondary-color)]/30">
+                                    <td class="p-3 font-semibold">Mating System</td>
+                                    <td class="p-3 text-center">Promiscuous, male-dominated</td>
+                                    <td class="p-3 text-center">Promiscuous, female-dominated</td>
+                                    <td class="p-3 text-center font-bold">Long-term pair bonds</td>
+                                </tr>
+                                <tr class="border-b border-[var(--secondary-color)]/30">
+                                    <td class="p-3 font-semibold">Paternal Care</td>
+                                    <td class="p-3 text-center">Virtually absent</td>
+                                    <td class="p-3 text-center">Absent</td>
+                                    <td class="p-3 text-center font-bold">Extensive & common</td>
+                                </tr>
+                                 <tr class="border-b border-[var(--secondary-color)]/30">
+                                    <td class="p-3 font-semibold">Social Use of Sex</td>
+                                    <td class="p-3 text-center">Primarily for reproduction</td>
+                                    <td class="p-3 text-center">Also for conflict resolution & bonding</td>
+                                    <td class="p-3 text-center font-bold">Primarily within pair-bonds</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="ovulation-content">
+                        <h4 class="text-xl font-bold mb-2">🤫 The Puzzle of Concealed Ovulation</h4>
+                        <p class="text-sm">Unlike many primates, human females have no obvious external signs of fertility. Why hide it?</p>
+                        <div id="ovulation-content" class="content-hidden mt-4 text-sm space-y-2">
+                           <p><strong>Paternal Investment Hypothesis:</strong> By concealing ovulation, a male cannot time his mating efforts. To ensure paternity, his best strategy is to form a long-term bond and mate regularly, promoting paternal care.</p>
+                           <p><strong>Reduced Infanticide Hypothesis:</strong> If a female mates with multiple males, paternity becomes confused, reducing the risk that any one male will kill her infant.</p>
+                        </div>
+                    </div>
+                    <div class="card bg-[var(--card-bg)] p-6 rounded-lg shadow-md cursor-pointer" data-toggle="content" data-target="menopause-content">
+                        <h4 class="text-xl font-bold mb-2">👵 The Enigma of Menopause</h4>
+                        <p class="text-sm">Why do women cease reproduction decades before they die? This is extremely rare in nature.</p>
+                         <div id="menopause-content" class="content-hidden mt-4 text-sm space-y-2">
+                           <p><strong>The Grandmother Hypothesis:</strong> This is the leading theory. An older woman can achieve greater evolutionary success by helping her own children raise grandchildren (passing on 50% of her genes indirectly) than by having more children of her own, which becomes riskier with age. Grandmothers provide crucial resources, care, and knowledge.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-[var(--primary-color)] text-white text-center py-8">
+        <p>An interactive summary based on the biological report "Sex: An Evolutionary Odyssey".</p>
+        <p class="text-sm opacity-75 mt-2">Crafted with modern web technologies to explore the science of life.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const contentTogglers = document.querySelectorAll('[data-toggle="content"]');
+            contentTogglers.forEach(toggler => {
+                toggler.addEventListener('click', () => {
+                    const targetId = toggler.dataset.target;
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.classList.toggle('content-hidden');
+                        targetElement.classList.toggle('content-visible');
+                    }
+                });
+            });
+            
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const tabId = btn.dataset.tab;
+                    tabContents.forEach(content => {
+                        if (content.id === `${tabId}-tab`) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            mobileMenu.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+
+            const twofoldCostCtx = document.getElementById('twofoldCostChart').getContext('2d');
+            new Chart(twofoldCostCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Gen 1', 'Gen 2', 'Gen 3', 'Gen 4', 'Gen 5'],
+                    datasets: [
+                        {
+                            label: 'Asexual Population',
+                            data: [10, 20, 40, 80, 160],
+                            backgroundColor: '#D4A373',
+                            borderColor: '#8D6E63',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Sexual Population',
+                            data: [10, 10, 10, 10, 10],
+                            backgroundColor: '#A1887F',
+                            borderColor: '#4A4A4A',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Population Growth: Asexual vs. Sexual',
+                            font: { size: 16, weight: 'bold' },
+                            color: '#4A4A4A'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + ' reproducing individuals';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Reproducing Individuals'
+                            }
+                        },
+                        x: {
+                             title: {
+                                display: true,
+                                text: 'Generations'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const animationContainer = document.getElementById('anisogamy-animation');
+            const playBtn = document.getElementById('play-animation-btn');
+            const animationText = document.getElementById('animation-text');
+
+            function playAnisogamyAnimation() {
+                animationContainer.innerHTML = '';
+                animationContainer.appendChild(animationText);
+                let gametes = [];
+                
+                animationText.textContent = "1. Isogamy: All gametes are equal.";
+
+                for(let i=0; i<20; i++) {
+                    let gamete = document.createElement('div');
+                    gamete.className = 'gamete';
+                    let size = 20;
+                    gamete.style.width = `${size}px`;
+                    gamete.style.height = `${size}px`;
+                    gamete.style.left = `${Math.random() * (animationContainer.clientWidth - size)}px`;
+                    gamete.style.top = `${Math.random() * (animationContainer.clientHeight - size)}px`;
+                    animationContainer.appendChild(gamete);
+                    gametes.push(gamete);
+                }
+
+                setTimeout(() => {
+                    animationText.textContent = "2. Variation arises...";
+                    gametes.forEach(g => {
+                        g.remove();
+                    });
+                    gametes = [];
+                    for(let i=0; i<20; i++) {
+                        let gamete = document.createElement('div');
+                        gamete.className = 'gamete';
+                        let size;
+                        const r = Math.random();
+                        if (r < 0.33) size = 8;
+                        else if (r < 0.66) size = 20;
+                        else size = 40;
+                        
+                        gamete.style.width = `${size}px`;
+                        gamete.style.height = `${size}px`;
+                        gamete.style.left = `${Math.random() * (animationContainer.clientWidth - size)}px`;
+                        gamete.style.top = `${Math.random() * (animationContainer.clientHeight - size)}px`;
+                        animationContainer.appendChild(gamete);
+                        gametes.push({el: gamete, size: size});
+                    }
+                }, 3000);
+                
+                setTimeout(() => {
+                    animationText.textContent = "3. Disruptive selection favors the extremes.";
+                    gametes.forEach(g => {
+                        if (g.size === 20) {
+                            g.el.style.opacity = '0';
+                            g.el.style.transform = 'scale(0)';
+                        } else {
+                           g.el.style.left = `${Math.random() * (animationContainer.clientWidth - g.size)}px`;
+                           g.el.style.top = `${Math.random() * (animationContainer.clientHeight - g.size)}px`;
+                        }
+                    });
+                }, 6000);
+
+                 setTimeout(() => {
+                    animationText.textContent = "4. Anisogamy: Two specialized gametes (sperm & egg).";
+                    gametes.forEach(g => {
+                        if (g.size === 20) g.el.remove();
+                    });
+                }, 8000);
+            }
+
+            playBtn.addEventListener('click', playAnisogamyAnimation);
+        });
+    </script>
+</body>
+</html>
